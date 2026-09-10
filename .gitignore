@@ -1,0 +1,43 @@
+# ---- Toolchains & fetched dependencies (emsdk is ~1.9 GB; invariant 7) ----
+emsdk/
+third_party/
+
+# ---- Build output ----
+build/
+build_desktop/
+web/
+out/
+
+# ---- Android (target dropped 2026-09-10; stays on disk, out of history) ----
+android/
+
+# ---- CMake ----
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CMakeUserPresets.json
+
+# ---- MSVC / Visual Studio ----
+.vs/
+*.obj
+*.pdb
+*.ilk
+*.exe
+*.lib
+*.exp
+*.user
+
+# ---- Editor & OS noise ----
+*.bak*
+*.orig
+*.rej
+*~
+.DS_Store
+Thumbs.db
+
+# ---- Claude / AI assistant working files (local context, not shared) ----
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+.claude/
+.mcp.json
