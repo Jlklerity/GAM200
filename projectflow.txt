@@ -1,0 +1,18 @@
+main(argc, argv):
+    Init()                      // SDL_Init, attributes, window, context, GL loader
+    VertexSpecification()
+    CreateGraphicsPipeline()
+
+    #ifdef PLATFORM_EMSCRIPTEN
+        emscripten_set_main_loop(Frame, 0, 1);   // never returns
+    #else
+        while (g_running) Frame();
+        CleanUp();
+    #endif
+
+Frame():
+    PollEvents()    // SDL_PollEvent: SDL_QUIT, SDL_WINDOWEVENT_SIZE_CHANGED -> update viewport
+    Input(dt)       // SDL_GetKeyboardState
+    PreDraw()
+    Draw()
+    SDL_GL_SwapWindow(g_window)
