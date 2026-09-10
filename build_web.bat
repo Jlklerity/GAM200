@@ -27,12 +27,12 @@ REM emcc compiles .cpp as C++ but does not link the C++ standard library, which
 REM shows up as undefined std::/__cxa_/operator new symbols at link time.
 REM (-sDEFAULT_TO_CXX=1 would also work; em++ is the documented way.)
 
-REM em++.bat, NOT bare em++. A Unix-style extensionless launcher (from a macOS
+REM em++.exe, NOT bare em++. A Unix-style extensionless launcher (from a macOS
 REM or Linux emsdk copied into a Windows tree) satisfies `WHERE em++` because
 REM WHERE matches exact filenames before trying PATHEXT -- but cmd.exe cannot
 REM execute it, so the guard passes and the compile dies with
 REM "'em++' is not recognized". Only the .bat wrapper proves a Windows install.
-WHERE em++.bat >nul 2>nul
+WHERE em++.exe >nul 2>nul
 IF ERRORLEVEL 1 (
     IF EXIST "%~dp0emsdk\emsdk_env.bat" (
         echo Activating emsdk from %~dp0emsdk ...
@@ -40,12 +40,12 @@ IF ERRORLEVEL 1 (
     )
 )
 
-WHERE em++.bat >nul 2>nul
+WHERE em++.exe >nul 2>nul
 IF ERRORLEVEL 1 (
     echo error: em++ not found on PATH.
-    echo        No em++.bat found. Either emsdk is not installed for Windows,
-    echo        or emsdk\upstream holds a macOS/Linux toolchain (no .exe, no .bat).
-    echo        Check: dir emsdk\upstream\emscripten\em++.bat
+    echo        No em++.exe found. Either emsdk is not installed for Windows,
+    echo        or emsdk\upstream holds a macOS/Linux toolchain - no .exe wrappers.
+    echo        Check: dir emsdk\upstream\emscripten\em++.exe
     echo        Reinstall: cd emsdk ^&^& emsdk install latest ^&^& emsdk activate latest
     EXIT /B 1
 )

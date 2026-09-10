@@ -59,7 +59,7 @@ emsdk activate 6.0.9
 cd ..
 ```
 
-`build_web.bat` checks for `em++.bat` on `PATH` and falls back to `.\emsdk\emsdk_env.bat`, so
+`build_web.bat` checks for `em++.exe` on `PATH` and falls back to `.\emsdk\emsdk_env.bat`, so
 cloning into the project root as `emsdk/` is picked up automatically. `emsdk/` is gitignored --
 it is ~1.9 GB and platform-specific.
 
@@ -69,7 +69,7 @@ no `.exe` and no `.bat` wrappers, yet bare `WHERE em++` still succeeds, because 
 the extensionless Unix launcher before trying `PATHEXT`. Verify a real Windows install with:
 
 ```
-dir emsdk\upstream\emscripten\em++.bat
+dir emsdk\upstream\emscripten\em++.exe
 ```
 
 **Reinstalling:** `emsdk install` skips the download when the versioned directory already
