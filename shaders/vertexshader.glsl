@@ -1,18 +1,18 @@
 #version 300 es
 
 layout(location = 0) in vec3 position;
-layout(location = 1) in vec3 color;
+layout(location = 1) in vec4 color;
 layout(location = 2) in vec2 avertexTexCoord;
 
-uniform float u_offsetX;
-uniform float u_offsetY;
+uniform mat4 u_View;
+uniform mat4 u_Projection;
 
-out vec3 v_color;
+out vec4 v_color;
 out vec2 vTexCoord;
 
 void main(){
     v_color = color;
     vTexCoord = avertexTexCoord;
     
-    gl_Position = vec4(position.x + u_offsetX, position.y + u_offsetY, position.z, 1.0);
+    gl_Position = u_Projection * u_View * vec4(position, 1.0);
 }

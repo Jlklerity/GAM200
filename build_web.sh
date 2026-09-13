@@ -74,6 +74,9 @@ fi
 # (-sDEFAULT_TO_CXX=1 would also work; em++ is the documented way.)
 em++ -std=c++20 -O2 \
     Scene/main.cpp \
+    Scene/Application.cpp \
+    Scene/AssetManager.cpp \
+    Scene/InputManager.cpp \
     Scene/stb_image_impl.cpp \
     -IScene \
     -I"$GLM_DIR" \
