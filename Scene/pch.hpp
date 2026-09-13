@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Platform.h"
+#include "Platform.hpp"
 
 // --- Third party -----------------------------------------------------------
 #define STBI_NO_STDIO      // no fopen path: decoding happens from memory only

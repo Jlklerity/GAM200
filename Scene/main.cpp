@@ -30,10 +30,10 @@ void CleanUp();
 
 void GetOpenGLVersionInfo()
 {
-    std::cout<<"Vendor: "          <<glGetString(GL_VENDOR)<<'\n';
-    std::cout<<"Renderer: "        <<glGetString(GL_RENDERER)<<'\n';
-    std::cout<<"Version: "         <<glGetString(GL_VERSION)<<'\n';
-    std::cout<<"Shading Language: "<<glGetString(GL_SHADING_LANGUAGE_VERSION)<<'\n';
+    std::cout<<"Vendor: "          << reinterpret_cast<const char*>(glGetString(GL_VENDOR)) << '\n';
+    std::cout<<"Renderer: "        << reinterpret_cast<const char*>(glGetString(GL_RENDERER)) << '\n';
+    std::cout<<"Version: "         << reinterpret_cast<const char*>(glGetString(GL_VERSION)) << '\n';
+    std::cout<<"Shading Language: "<< reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)) << '\n';
 }
 
 void VertexSpecification()
@@ -205,7 +205,7 @@ std::string AssetPath(const std::string& folder, const std::string& name)
 }
 
 std::string ShaderPath(const std::string& name) { return AssetPath("shaders", name); }
-std::string ImagePath (const std::string& name) { return AssetPath("images",  name); }
+std::string ImagePath(const std::string& name) { return AssetPath("images",  name); }
 
 // Returns the file's contents, or an empty string on failure. Unlike the old
 // ifstream version this reports WHY it failed: an empty return used to reach
@@ -244,7 +244,7 @@ std::string LoadShaderAsString(const std::string& path)
 
 GLuint CompileShader(GLuint type, const std::string& source)
 {
-    GLuint shaderObject = 0;
+    GLuint shaderObject{};
     if(type == GL_VERTEX_SHADER)
     {
         shaderObject = glCreateShader(GL_VERTEX_SHADER);
@@ -267,6 +267,7 @@ GLuint CompileShader(GLuint type, const std::string& source)
         glGetShaderInfoLog(shaderObject, maxLength, &maxLength, &errorLog[0]);
         std::cout << "Shader compilation failed:\n" << &errorLog[0] << '\n';
         glDeleteShader(shaderObject);
+        return 0;
     }
 
     return shaderObject;

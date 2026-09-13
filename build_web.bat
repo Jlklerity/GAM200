@@ -100,7 +100,7 @@ REM       root get clamped. It works, but it is an accident of path handling.
 REM
 REM   WASM=1 is the default now, so it is no longer passed explicitly.
 
-em++ -std=c++17 -O2 ^
+em++ -std=c++20 -O2 ^
     Scene/main.cpp ^
     Scene/stb_image_impl.cpp ^
     -IScene ^
@@ -112,6 +112,7 @@ em++ -std=c++17 -O2 ^
     -sALLOW_MEMORY_GROWTH=1 ^
     --preload-file shaders ^
     --preload-file images ^
+    --shell-file shell.html ^
     -o web/index.html
 
 IF ERRORLEVEL 1 (

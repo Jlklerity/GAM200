@@ -72,7 +72,7 @@ fi
 # emcc compiles .cpp as C++ but does not link the C++ standard library, which
 # shows up as undefined std::/__cxa_/operator new symbols at link time.
 # (-sDEFAULT_TO_CXX=1 would also work; em++ is the documented way.)
-em++ -std=c++17 -O2 \
+em++ -std=c++20 -O2 \
     Scene/main.cpp \
     Scene/stb_image_impl.cpp \
     -IScene \
