@@ -65,6 +65,17 @@ IF NOT EXIST "%GLM_DIR%" (
     )
 )
 
+SET "STB_DIR=third_party\stb"
+
+IF NOT EXIST "%STB_DIR%" (
+    echo Fetching stb into %STB_DIR% ...
+    git clone --depth 1 https://github.com/nothings/stb.git "%STB_DIR%"
+    IF ERRORLEVEL 1 (
+        echo error: stb fetch failed. Is git installed and on PATH?
+        EXIT /B 1
+    )
+)
+
 REM --- Build ------------------------------------------------------------------
 REM Flag notes:
 REM
@@ -91,13 +102,16 @@ REM   WASM=1 is the default now, so it is no longer passed explicitly.
 
 em++ -std=c++17 -O2 ^
     Scene/main.cpp ^
+    Scene/stb_image_impl.cpp ^
     -IScene ^
     -I"%GLM_DIR%" ^
+    -I"%STB_DIR%" ^
     -sUSE_SDL=2 ^
     -sMIN_WEBGL_VERSION=2 ^
     -sMAX_WEBGL_VERSION=2 ^
     -sALLOW_MEMORY_GROWTH=1 ^
     --preload-file shaders ^
+    --preload-file images ^
     -o web/index.html
 
 IF ERRORLEVEL 1 (

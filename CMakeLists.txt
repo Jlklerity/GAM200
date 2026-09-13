@@ -20,7 +20,7 @@ cmake_policy(VERSION 3.15)
 
 project(GAM200)
 
-set(CMAKE_CXX_STANDARD          17)
+set(CMAKE_CXX_STANDARD          20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Fetch SDL2 + glad for the desktop build
@@ -37,7 +37,7 @@ file(GLOB SCENE_SRC "${SCENE_DIR}/*.cpp")
 
 add_executable(GAM200 ${SCENE_SRC})
 
-target_include_directories(GAM200 PRIVATE ${SCENE_DIR})
+target_include_directories(GAM200 PRIVATE ${SCENE_DIR} ${CMAKE_CURRENT_LIST_DIR}/third_party/stb)
 
 target_link_libraries(GAM200
     PRIVATE SDL2::SDL2-static
@@ -48,7 +48,7 @@ target_link_libraries(GAM200
 
 # C++17 on MSVC
 if(MSVC)
-    target_compile_options(GAM200 PRIVATE /W4 /WX- /permissive- /std:c++17)
+    target_compile_options(GAM200 PRIVATE /W4 /WX- /permissive- /std:c++20)
 endif()
 
 # ---------------------------------------------------------------------------
@@ -60,6 +60,10 @@ add_custom_command(TARGET GAM200 POST_BUILD
         "${CMAKE_CURRENT_LIST_DIR}/shaders"
         "$<TARGET_FILE_DIR:GAM200>/shaders"
     COMMENT "Copying shader assets to build directory"
+
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_CURRENT_LIST_DIR}/images"
+    "$<TARGET_FILE_DIR:GAM200>/images"
 )
 
 # Tell Visual Studio to use the exe's output directory as the working

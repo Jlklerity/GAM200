@@ -34,6 +34,14 @@ if [ ! -d "$GLM_DIR" ]; then
     git clone --branch "$GLM_TAG" --depth 1 https://github.com/g-truc/glm.git "$GLM_DIR"
 fi
 
+
+STB_DIR="third_party/stb"
+
+if [ ! -d "$STB_DIR" ]; then
+    echo "Fetching stb into ${STB_DIR} ..."
+    git clone --depth 1 https://github.com/nothings/stb.git "$STB_DIR"
+fi
+
 # --- Build ------------------------------------------------------------------
 # Flag notes:
 #
@@ -66,13 +74,16 @@ fi
 # (-sDEFAULT_TO_CXX=1 would also work; em++ is the documented way.)
 em++ -std=c++17 -O2 \
     Scene/main.cpp \
+    Scene/stb_image_impl.cpp \
     -IScene \
     -I"$GLM_DIR" \
+    -I"$STB_DIR" \
     -sUSE_SDL=2 \
     -sMIN_WEBGL_VERSION=2 \
     -sMAX_WEBGL_VERSION=2 \
     -sALLOW_MEMORY_GROWTH=1 \
     --preload-file shaders \
+    --preload-file images \
     -o web/index.html
 
 # For a debug build, swap -O2 above for:  -O0 -g -gsource-map -sASSERTIONS=2

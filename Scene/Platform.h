@@ -20,10 +20,7 @@
     #define PLATFORM_EMSCRIPTEN
 #elif defined(_WIN32)
     #define PLATFORM_WINDOWS
-#elif defined(__ANDROID__)
-    #define PLATFORM_ANDROID
 #endif
-
 // ---------------------------------------------------------------------------
 // Platform-specific OpenGL and system headers
 // ---------------------------------------------------------------------------
@@ -53,17 +50,6 @@
     #define LOGE(...) do { printf("[ERROR] " __VA_ARGS__); printf("\n"); } while(0)
     #define LOGD(...) do { printf("[DEBUG] " __VA_ARGS__); printf("\n"); } while(0)
 
-#elif defined(PLATFORM_ANDROID)
-    #include <GLES3/gl3.h>
-    #include <SDL.h>
-    #include <android/log.h>
-    #include <cstring>
-
-    #ifndef LOG_TAG
-    #define LOG_TAG "GAM200"
-    #endif
-
-    #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,  LOG_TAG, __VA_ARGS__)
-    #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
-    #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+#else
+    #error "Platform.h: unsupported target (expected Emscripten or Windows)"
 #endif

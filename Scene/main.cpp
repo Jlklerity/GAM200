@@ -1,16 +1,11 @@
-#include "Platform.h"
-#include <glm/glm.hpp>
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
-#include <iostream>
-#include <vector>
-#include <string>
-#include <algorithm>
+#include "pch.hpp"
 
 // --- Window / GL context -------------------------------------------------
 SDL_Window*   g_window  = nullptr;
 SDL_GLContext g_context = nullptr;
 bool          g_running = false;
+GLuint        gTexObj   = 0;
+GLint         gLocTex2d = -1;
 
 int gScreenWidth  = 640;
 int gScreenHeight = 480;
@@ -45,19 +40,23 @@ void VertexSpecification()
 {
     //cpu
     const std::vector<GLfloat> vertexData{
-       
+
        -0.5f, -0.5f, 0.0f,   // Position
         1.0f,  0.0f, 0.0f,   // Color
+        0.0f,  0.0f,         // TexCoord
 
-       -0.5f,  0.5f, 0.0f,     
-        0.0f,  0.0f, 1.0f,      
+       -0.5f,  0.5f, 0.0f,
+        0.0f,  0.0f, 1.0f,
+        0.0f,  1.0f,
 
-        0.5f, -0.5f, 0.0f, 
+        0.5f, -0.5f, 0.0f,
         0.8f,  1.0f, 0.0f,
-    
-        0.5f,  0.5f, 0.0f, 
-        0.0f,  0.0f, 1.0f,    
-   
+        1.0f,  0.0f,
+
+        0.5f,  0.5f, 0.0f,
+        0.0f,  0.0f, 1.0f,
+        1.0f,  1.0f,
+
     };
 
     const std::vector<GLuint> indexData{
@@ -82,17 +81,94 @@ void VertexSpecification()
 
     gIndexCount = static_cast<GLsizei>(indexData.size());
 
-    GLsizei stride = 6 * sizeof(GLfloat);
+    GLsizei stride = 8 * sizeof(GLfloat);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(GLfloat)));
 
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(GLfloat)));
+
     // Unbind last. The attribute enable bits and the element-buffer binding
     // are VAO state, already captured above -- the old glDisableVertexAttribArray
     // calls after this line acted on VAO 0, not on ours.
     glBindVertexArray(0);
+}
+
+GLuint setup_texobj(std::string const& tex_path)
+{
+    SDL_RWops* rw = SDL_RWFromFile(tex_path.c_str(), "rb");
+    if (rw == nullptr)
+    {
+        LOGE("setup_texobj: failed to open texture file '%s': %s",
+             tex_path.c_str(), SDL_GetError());
+        return 0;
+    }
+
+    const Sint64 size = SDL_RWsize(rw);
+    if (size <= 0)
+    {
+        LOGE("setup_texobj: '%s' is empty or unsized: %s",
+             tex_path.c_str(), SDL_GetError());
+        SDL_RWclose(rw);
+        return 0;
+    }
+
+    std::vector<stbi_uc> encoded(static_cast<size_t>(size));
+    const size_t got = SDL_RWread(rw, encoded.data(), 1, encoded.size());
+    SDL_RWclose(rw);
+
+    if (got != encoded.size())
+    {
+        LOGE("setup_texobj: short read on '%s' (%lld of %lld bytes)",
+             tex_path.c_str(), (long long)got, (long long)encoded.size());
+        return 0;
+    }
+
+    // GL samples with the origin at the bottom-left; PNG and JPEG both store
+    // the top row first. The .tex pipeline baked this flip in at conversion
+    // time -- with encoded formats it has to happen at load.
+    stbi_set_flip_vertically_on_load(1);
+
+    int width = 0, height = 0, channels_in_file = 0;
+    // The trailing 4 forces RGBA whatever the file holds, so the upload format
+    // is fixed and a 3-channel image with an odd width cannot trip the default
+    // GL_UNPACK_ALIGNMENT of 4 and shear diagonally.
+    stbi_uc* ptr_texels = stbi_load_from_memory(
+        encoded.data(), (static_cast<int>(encoded.size())),
+        &width, &height, &channels_in_file, 4);
+
+    if (ptr_texels == nullptr)
+    {
+        LOGE("setup_texobj: decode failed for '%s': %s",
+             tex_path.c_str(), stbi_failure_reason());
+        return 0;
+    }
+
+    GLuint texobj_hdl{};
+    glGenTextures(1, &texobj_hdl);
+    glBindTexture(GL_TEXTURE_2D, texobj_hdl);
+
+    // allocate GPU storage for texture image data loaded from file
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
+    // copy image data from client memory to GPU texture buffer memory
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height,
+                    GL_RGBA, GL_UNSIGNED_BYTE, ptr_texels);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_REPEAT);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    // client memory not required since image is buffered in GPU memory
+    stbi_image_free(ptr_texels);
+
+    LOGI("setup_texobj: '%s' %dx%d (%d channels in file)",
+         tex_path.c_str(), width, height, channels_in_file);
+    return texobj_hdl;
 }
 
 // ---------------------------------------------------------------------------
@@ -101,9 +177,6 @@ void VertexSpecification()
 // SDL_RWFromFile resolves a relative path differently on each target, and that
 // difference is what makes one code path work everywhere:
 //
-//   Android     relative paths are read straight out of the APK's assets/,
-//               so "shaders/x.glsl" finds assets/shaders/x.glsl. No JNI, no
-//               AAssetManager plumbing.
 //   Desktop     relative to the process CWD. SDL_GetBasePath() returns the
 //               directory holding the executable -- the same directory CMake's
 //               POST_BUILD step copies shaders/ into -- so prepending it makes
@@ -115,11 +188,8 @@ void VertexSpecification()
 // This replaces the old "../../shaders/..." literal, which only worked because
 // Emscripten clamps paths that climb above the root.
 // ---------------------------------------------------------------------------
-std::string ShaderPath(const std::string& name)
+std::string AssetPath(const std::string& folder, const std::string& name)
 {
-#ifdef PLATFORM_ANDROID
-    return "shaders/" + name;
-#else
     static const std::string base = []() -> std::string
     {
         char* p = SDL_GetBasePath();
@@ -131,9 +201,11 @@ std::string ShaderPath(const std::string& name)
         SDL_free(p);                // SDL_GetBasePath allocates; we own it
         return s;
     }();
-    return base + "shaders/" + name;
-#endif
+    return base + folder + "/" + name;
 }
+
+std::string ShaderPath(const std::string& name) { return AssetPath("shaders", name); }
+std::string ImagePath (const std::string& name) { return AssetPath("images",  name); }
 
 // Returns the file's contents, or an empty string on failure. Unlike the old
 // ifstream version this reports WHY it failed: an empty return used to reach
@@ -172,7 +244,7 @@ std::string LoadShaderAsString(const std::string& path)
 
 GLuint CompileShader(GLuint type, const std::string& source)
 {
-    GLuint shaderObject;
+    GLuint shaderObject = 0;
     if(type == GL_VERTEX_SHADER)
     {
         shaderObject = glCreateShader(GL_VERTEX_SHADER);
@@ -254,6 +326,16 @@ void CreateGraphicsPipeline()
         LOGE("CreateGraphicsPipeline: shader program creation failed");
         CleanUp();
         exit(1);
+    }
+
+    gLocTex2d = glGetUniformLocation(gGraphicsPipelineShaderProgram, "uTex2d");
+    if (gLocTex2d < 0) std::cout << "warning: uTex2d not found\n";
+
+    if (gLocTex2d >= 0)
+    {
+        glUseProgram(gGraphicsPipelineShaderProgram);
+        glUniform1i(gLocTex2d, 0);
+        glUseProgram(0);
     }
 
     // Locations are fixed once the program is linked. Query them here, never
@@ -389,10 +471,14 @@ void Draw()
     if (gLocOffsetX >= 0) glUniform1f(gLocOffsetX, g_uOffsetX);
     if (gLocOffsetY >= 0) glUniform1f(gLocOffsetY, g_uOffsetY);
 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, gTexObj);
+
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, gIndexCount, GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);      
     glUseProgram(0);
 }
 
@@ -438,6 +524,7 @@ void CleanUp()
     if (VAO) { glDeleteVertexArrays(1, &VAO); VAO = 0; }
     if (VBO) { glDeleteBuffers(1, &VBO);      VBO = 0; }
     if (EBO) { glDeleteBuffers(1, &EBO);      EBO = 0; }
+    if (gTexObj) { glDeleteTextures(1, &gTexObj); gTexObj = 0; }
 
     if (gGraphicsPipelineShaderProgram)
     {
@@ -458,10 +545,10 @@ int main(int argc, char* argv[])
 {
     (void)argc;
     (void)argv;
-
     InitializeProgram();
     VertexSpecification();
     CreateGraphicsPipeline();
+    gTexObj = setup_texobj(ImagePath("images.png"));
     MainLoop();
 
 #ifndef PLATFORM_EMSCRIPTEN
