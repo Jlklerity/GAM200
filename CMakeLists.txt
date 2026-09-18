@@ -46,7 +46,7 @@ target_link_libraries(GAM200
     PRIVATE glm::glm
 )
 
-# C++17 on MSVC
+# C++20 on MSVC
 if(MSVC)
     target_compile_options(GAM200 PRIVATE /W4 /WX- /permissive- /std:c++20)
 endif()

@@ -8,7 +8,7 @@ void InputManager::PollEvents(bool& running, int* screenwidth, int* screenheight
     {
         switch (e.type)
         {
-        case SDL_QUIT:                       // window close button, Alt+F4
+        case SDL_QUIT:                  
             running = false;
             break;
 
@@ -43,27 +43,11 @@ void InputManager::Update(float dt, bool& running, glm::vec3& cameraPos, bool& u
     if (keys[SDL_SCANCODE_S]) cameraPos.y -= speed * dt;
     if (keys[SDL_SCANCODE_A]) cameraPos.x -= speed * dt;
     if (keys[SDL_SCANCODE_D]) cameraPos.x += speed * dt;
-    if (keys[SDL_SCANCODE_R]) cameraPos.z += speed * dt;
-    if (keys[SDL_SCANCODE_F]) cameraPos.z -= speed * dt;
-
-    static bool wasPressed_V = false;
-    bool isPressed_V = keys[SDL_SCANCODE_V];
-
-    if (isPressed_V && !wasPressed_V) 
-    {
-        // Explicitly toggle the strongly-typed enum
-        if (Application::m_cam == Application::Camera_mode::ortho_mode) {
-            Application::m_cam = Application::Camera_mode::persp_mode;
-        } else {
-            Application::m_cam = Application::Camera_mode::ortho_mode;
-        }
-    }
-    wasPressed_V = isPressed_V;
 
     static bool wasPressed_P = false;
     bool isPressed_P = keys[SDL_SCANCODE_P];
 
-    if (isPressed_P && !isPressed_P)
+    if (isPressed_P && !wasPressed_P)
     {
         u_useTexture = !u_useTexture;
     }

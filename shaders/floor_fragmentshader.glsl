@@ -12,6 +12,7 @@ in vec2 vTexCoord;
 out vec4 color;
 
 void main(){
+   
     if(u_useTexture == 1)  
     {
         vec4 texColor = texture(uTex2d, vTexCoord);

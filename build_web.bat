@@ -103,7 +103,9 @@ REM   WASM=1 is the default now, so it is no longer passed explicitly.
 em++ -std=c++20 -O2 ^
     Scene/main.cpp ^
     Scene/Application.cpp ^
-    Scene/AssetManager.cpp ^
+    Scene/GameScene.cpp ^
+    Scene/Player.cpp ^
+    Scene/Floor.cpp ^
     Scene/InputManager.cpp ^
     Scene/stb_image_impl.cpp ^
     -I"%GLM_DIR%" ^
