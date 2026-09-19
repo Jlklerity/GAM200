@@ -17,9 +17,13 @@
 // Platform detection
 // ---------------------------------------------------------------------------
 #ifdef __EMSCRIPTEN__
-    #define PLATFORM_EMSCRIPTEN
+    #ifndef PLATFORM_EMSCRIPTEN
+        #define PLATFORM_EMSCRIPTEN
+    #endif
 #elif defined(_WIN32)
-    #define PLATFORM_WINDOWS
+    #ifndef PLATFORM_WINDOWS
+        #define PLATFORM_WINDOWS
+    #endif
 #endif
 // ---------------------------------------------------------------------------
 // Platform-specific OpenGL and system headers

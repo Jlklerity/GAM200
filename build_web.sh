@@ -73,13 +73,14 @@ fi
 # shows up as undefined std::/__cxa_/operator new symbols at link time.
 # (-sDEFAULT_TO_CXX=1 would also work; em++ is the documented way.)
 em++ -std=c++20 -O2 \
-    Scene/main.cpp \
-    Scene/Application.cpp \
-    Scene/GameScene.cpp \
-    Scene/Player.cpp \
-    Scene/Floor.cpp \
-    Scene/InputManager.cpp \
-    Scene/stb_image_impl.cpp \
+    Application/main.cpp ^
+    Application/Application.cpp ^
+    Scene/GameScene.cpp ^
+    Scene/Player.cpp ^
+    Scene/Floor.cpp ^
+    InputManager/InputManager.cpp ^
+    Renderer/stb_image_impl.cpp ^
+    Renderer/Mesh.cpp
     -IScene \
     -I"$GLM_DIR" \
     -I"$STB_DIR" \

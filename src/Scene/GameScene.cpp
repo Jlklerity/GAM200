@@ -1,4 +1,4 @@
-#include "GameScene.hpp"
+#include "Scene/GameScene.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
 GameScene::GameScene()

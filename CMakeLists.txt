@@ -32,12 +32,13 @@ add_definitions(-DPLATFORM_WINDOWS)
 # ---------------------------------------------------------------------------
 # Source files – everything in Scene/ (shared with Android + WebGL)
 # ---------------------------------------------------------------------------
-set(SCENE_DIR ${CMAKE_CURRENT_LIST_DIR}/Scene)
-file(GLOB SCENE_SRC "${SCENE_DIR}/*.cpp")
+set(SRC_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
+file(GLOB_RECURSE SCENE_SRC "${SRC_DIR}/*.cpp")
 
 add_executable(GAM200 ${SCENE_SRC})
 
-target_include_directories(GAM200 PRIVATE ${SCENE_DIR} ${CMAKE_CURRENT_LIST_DIR}/third_party/stb)
+
+target_include_directories(GAM200 PRIVATE ${SRC_DIR} ${CMAKE_CURRENT_LIST_DIR}/third_party/stb)
 
 target_link_libraries(GAM200
     PRIVATE SDL2::SDL2-static

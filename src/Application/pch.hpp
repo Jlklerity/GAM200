@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Platform.hpp"
+#include "Application/Platform.hpp"
 
 // --- Third party -----------------------------------------------------------
 #define STBI_NO_STDIO      // no fopen path: decoding happens from memory only
@@ -24,3 +24,4 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <memory>

@@ -1,10 +1,10 @@
 #pragma once
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "pch.hpp"
-#include "AssetManager.hpp"
-#include "InputManager.hpp"
-#include "GameScene.hpp"
+#include "Application/pch.hpp"
+#include "Renderer/AssetManager.hpp"
+#include "Input/InputManager.hpp"
+#include "Scene/GameScene.hpp"
 
 
 class Application {

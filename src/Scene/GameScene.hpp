@@ -1,10 +1,10 @@
 #pragma once
 
 #include <memory>
-#include "Model.hpp"
-#include "Platform.hpp"
-#include "Player.hpp"
-#include "Floor.hpp"
+#include "Scene/Model.hpp"
+#include "Application/Platform.hpp"
+#include "Scene/Player.hpp"
+#include "Scene/Floor.hpp"
 
 class GameScene : public Model 
 {
