@@ -1,12 +1,10 @@
 #pragma once
-
-#include <memory>
+#include <vector>
 #include "Scene/Model.hpp"
+#include "Scene/Entity.hpp"
 #include "Application/Platform.hpp"
-#include "Scene/Player.hpp"
-#include "Scene/Floor.hpp"
 
-class GameScene : public Model 
+class GameScene : public Model
 {
 public:
     GameScene();
@@ -18,10 +16,7 @@ public:
     static void SetCamera(float d);
 
 private:
-    std::unique_ptr<Player> m_player;
-    std::unique_ptr<Floor> m_floor;
-
+    std::vector<Entity> m_entities;
     unsigned int m_screenWidth;
     unsigned int m_screenHeight;
 };
-

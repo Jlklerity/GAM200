@@ -1,39 +1,34 @@
 #include "Scene/GameScene.hpp"
-#include <glm/gtc/matrix_transform.hpp>
 
 GameScene::GameScene()
     : m_screenWidth{0}, m_screenHeight{0}
 {
-    m_player = std::make_unique<Player>();
-    m_floor = std::make_unique<Floor>();
 }
 
 void GameScene::InitModel()
 {
-    if(!m_player || !m_floor) return;
+    auto playerMesh     = Mesh::CreateSquare(1.0f, 1.0f);
+    auto playerMaterial = Material::Create("player.png");
+    if (playerMesh && playerMaterial)
+        m_entities.emplace_back(playerMesh, playerMaterial, glm::vec3(0.0f));
+        
+    auto floorMesh     = Mesh::CreateCircle(1.0f, 12);
+    auto floorMaterial = Material::Create("floor_background.jpg");
+    if (floorMesh && floorMaterial)
+        m_entities.emplace_back(floorMesh, floorMaterial, glm::vec3(0.0f));
 
-    m_player->InitModel();
-    m_floor->InitModel();
 }
 
 void GameScene::Render(const glm::vec3& cameraPos, bool useTexture)
 {
-    if(m_player) m_player->Render(cameraPos, useTexture);
-    if(m_floor) m_floor->Render(cameraPos, useTexture);    
-     
+    for (auto& entity : m_entities)
+        entity.Render(cameraPos, static_cast<int>(m_screenWidth), static_cast<int>(m_screenHeight), useTexture);
 }
 
-void GameScene::SetCamera(float d)
-{
-
-}
+void GameScene::SetCamera(float d) { }
 
 void GameScene::Resize(int w, int h)
 {
-    m_screenWidth = w;
-    m_screenHeight = h;
-    
-    if (m_player) m_player->Resize(w, h);
-    if (m_floor) m_floor->Resize(w, h);
-
+    m_screenWidth  = static_cast<unsigned int>(w);
+    m_screenHeight = static_cast<unsigned int>(h);
 }
