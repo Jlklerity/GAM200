@@ -26,9 +26,6 @@ public:
 private:
     Material() = default;
 
-    AssetManager m_assetmanager;
-    ShaderHelper m_shaderhelper;
-
     GLuint    m_shaderProgram = 0, m_texture = 0;
     bool      m_useTexture = true;
     glm::vec4 m_color{1.0f};

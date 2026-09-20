@@ -5,7 +5,13 @@
 class ShaderHelper
 {
 public:
-    GLuint CompileShader(GLuint type, const std::string& source) 
+    ShaderHelper() = delete;
+    ShaderHelper(const ShaderHelper&) = delete;
+    ShaderHelper& operator=(const ShaderHelper&) = delete;
+    ShaderHelper(ShaderHelper&&) = delete;
+    ShaderHelper& operator=(ShaderHelper&&) = delete;
+
+    static GLuint CompileShader(GLuint type, const std::string& source) 
     {
         GLuint shader = glCreateShader(type);
         const char* src = source.c_str();
@@ -14,7 +20,7 @@ public:
         return shader;
     }
     
-    GLuint CreateShaderProgram(const std::string& vSource, const std::string& fSource) 
+    static GLuint CreateShaderProgram(const std::string& vSource, const std::string& fSource) 
     {
         GLuint program = glCreateProgram();
         GLuint vs = CompileShader(GL_VERTEX_SHADER, vSource);

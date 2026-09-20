@@ -1,4 +1,5 @@
 #include "Scene/GameScene.hpp"
+#include "Input/InputManager.hpp"
 #include <iostream>
 
 GameScene::GameScene()
@@ -12,7 +13,7 @@ void GameScene::InitModel()
     MeshPtr circleMesh12     = Mesh::CreateCircle(1.0f, 12);
     MeshPtr circleMesh25     = Mesh::CreateCircle(1.0f, 25);
     MeshPtr triangleMesh   = Mesh::CreateTriangle(1.0f, 1.0f);
-   
+    
     MaterialPtr playerMaterial = Material::Create("player.png");
     if (squareMesh && playerMaterial)
         m_entities.emplace_back(squareMesh, playerMaterial, glm::vec3(0.0f));
@@ -30,10 +31,16 @@ void GameScene::InitModel()
 
 void GameScene::Render(const glm::vec3& cameraPos, bool useTexture)
 {
+    if (InputManager::IsKeyPressed(Key::Up))
+        m_entities[3].setPosition(glm::vec3{0.1f, 0.1f, 0.0f});
+    
+    if (InputManager::IsKeyPressed(Key::Down))
+        m_entities[3].setPosition(glm::vec3{-0.1f, -0.1f, 0.0f});
+
     for (auto& entity : m_entities)
     {
         entity.Render(cameraPos, static_cast<int>(m_screenWidth), static_cast<int>(m_screenHeight), useTexture);
-        std::cout << entity.getPosition()<< '\n';
+        //std::cout << entity.getPosition()<< '\n';
     }
 }
 

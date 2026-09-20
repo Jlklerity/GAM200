@@ -1,18 +1,17 @@
 #pragma once
 #include <vector>
-#include "Scene/Model.hpp"
 #include "Scene/Entity.hpp"
 #include "Application/Platform.hpp"
 #include "Renderer/Mesh.hpp"
 
-class GameScene : public Model
+class GameScene 
 {
 public:
     GameScene();
 
-    void InitModel()            override;
-    void Render(const glm::vec3& cameraPos, bool useTexture) override;
-    void Resize(int w, int h)   override;
+    void InitModel();
+    void Render(const glm::vec3& cameraPos, bool useTexture);
+    void Resize(int w, int h);
 
     static void SetCamera(float d);
 

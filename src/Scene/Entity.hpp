@@ -7,7 +7,7 @@ class Entity
 {
 public:
     Entity(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material, const glm::vec3& position)
-        : m_mesh(std::move(mesh)), m_material(std::move(material)), m_position(position) {}
+        : m_mesh{std::move(mesh)}, m_material{std::move(material)}, m_position{position} {}
 
     void Render(const glm::vec3& cameraPos, int screenW, int screenH, bool useTexture)
     {
@@ -21,10 +21,18 @@ public:
         return m_position; 
     }
 
+    glm::vec3& setPosition(glm::vec3&& pos)
+    {
+        m_position.x += pos.x;
+        m_position.y += pos.y;
+        m_position.z += pos.z;
+        return m_position;
+    }
+
 private:
-    std::shared_ptr<Mesh>     m_mesh;
-    std::shared_ptr<Material> m_material;
-    glm::vec3                 m_position;
+    MeshPtr      m_mesh;
+    MaterialPtr  m_material;
+    glm::vec3    m_position;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const glm::vec3& pos)

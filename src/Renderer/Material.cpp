@@ -7,21 +7,21 @@ Material::~Material()
     if (m_shaderProgram) glDeleteProgram(m_shaderProgram);
 }
 
-std::shared_ptr<Material> Material::Create(const std::string& textureFile, const glm::vec4& color,
+MaterialPtr Material::Create(const std::string& textureFile, const glm::vec4& color,
     bool useTexture, const std::string& vertShaderFile, const std::string& fragShaderFile)
 {
-    auto mat = std::shared_ptr<Material>(new Material());
+    MaterialPtr mat = std::shared_ptr<Material>(new Material());
     mat->m_color = color;
     mat->m_useTexture = useTexture;
 
-    std::string vSource = mat->m_assetmanager.LoadShaderAsString(mat->m_assetmanager.ShaderPath(vertShaderFile));
-    std::string fSource = mat->m_assetmanager.LoadShaderAsString(mat->m_assetmanager.ShaderPath(fragShaderFile));
+    std::string vSource = AssetManager::LoadShaderAsString(AssetManager::ShaderPath(vertShaderFile));
+    std::string fSource = AssetManager::LoadShaderAsString(AssetManager::ShaderPath(fragShaderFile));
     if (vSource.empty() || fSource.empty()) {
         LOGE("Material::Create: shader source missing (vert='%s', frag='%s')", vertShaderFile.c_str(), fragShaderFile.c_str());
         return nullptr;
     }
 
-    mat->m_shaderProgram = mat->m_shaderhelper.CreateShaderProgram(vSource, fSource);
+    mat->m_shaderProgram = ShaderHelper::CreateShaderProgram(vSource, fSource);
     if (!mat->m_shaderProgram) {
         LOGE("Material::Create: failed to build shader program");
         return nullptr;
@@ -35,7 +35,7 @@ std::shared_ptr<Material> Material::Create(const std::string& textureFile, const
     mat->m_locColor      = glGetUniformLocation(mat->m_shaderProgram, "u_Color");
 
     if (useTexture && !textureFile.empty())
-        mat->m_texture = mat->m_assetmanager.setup_texobj(mat->m_assetmanager.ImagePath(textureFile));
+        mat->m_texture = AssetManager::setup_texobj(AssetManager::ImagePath(textureFile));
 
     if (mat->m_locTex2d >= 0) {
         glUseProgram(mat->m_shaderProgram);

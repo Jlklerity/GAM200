@@ -5,7 +5,13 @@
 class AssetManager
 {
 public:
-    std::string AssetPath(const std::string& folder, const std::string& name)
+    AssetManager() = delete;
+    AssetManager(const AssetManager&) = delete;
+    AssetManager& operator=(const AssetManager&) = delete;
+    AssetManager(AssetManager&&) = delete;
+    AssetManager& operator=(AssetManager&&) = delete;
+
+    static std::string AssetPath(const std::string& folder, const std::string& name)
     {
         static const std::string base = []() -> std::string
         {
@@ -21,17 +27,17 @@ public:
         return base + folder + "/" + name;
     }
 
-    std::string ShaderPath(const std::string& name)
+    static std::string ShaderPath(const std::string& name)
     {
         return AssetPath("shaders", name);
     }
 
-    std::string ImagePath(const std::string& name)
+    static std::string ImagePath(const std::string& name)
     {
         return AssetPath("images",  name);
     }
 
-    std::string LoadShaderAsString(const std::string& path)
+    static std::string LoadShaderAsString(const std::string& path)
     {
         SDL_RWops* rw = SDL_RWFromFile(path.c_str(), "rb");
         if (rw == nullptr)
@@ -62,7 +68,7 @@ public:
         return result;
     }
 
-    GLuint setup_texobj(std::string const& tex_path)
+    static GLuint setup_texobj(std::string const& tex_path)
     {
         SDL_RWops* rw = SDL_RWFromFile(tex_path.c_str(), "rb");
         if (rw == nullptr)
