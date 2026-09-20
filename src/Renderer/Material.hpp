@@ -5,6 +5,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+class Material;
+using MaterialPtr = std::shared_ptr<Material>;
+
 class Material
 {
 public:
@@ -12,7 +15,7 @@ public:
     Material(const Material&) = delete;
     Material& operator=(const Material&) = delete;
 
-    static std::shared_ptr<Material> Create(const std::string& textureFile = "",
+    static MaterialPtr Create(const std::string& textureFile = "",
                                             const glm::vec4& color = glm::vec4(1.0f),
                                             bool useTexture = true,
                                             const std::string& vertShaderFile = "vertexshader.glsl",

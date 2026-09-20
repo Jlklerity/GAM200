@@ -6,22 +6,27 @@ struct MeshData {
     std::vector<GLuint>  indices;
 };
 
+class Mesh;
+using MeshPtr = std::shared_ptr<Mesh>;
+
 class Mesh
 {
 public:
+    
+    
     ~Mesh();
+    Mesh() = delete;
     Mesh(const Mesh&) = delete;
     Mesh& operator=(const Mesh&) = delete;
 
-    static std::shared_ptr<Mesh> CreateSquare(float width, float height);
-    static std::shared_ptr<Mesh> CreateTriangle(float width, float height);
-    static std::shared_ptr<Mesh> CreateCircle(float radius, int segments);
+    static MeshPtr CreateSquare(float width, float height);
+    static MeshPtr CreateTriangle(float width, float height);
+    static MeshPtr CreateCircle(float radius, int segments);
 
     void Draw();
 
 private:
-    Mesh() = default;
-    static std::shared_ptr<Mesh> Create(const MeshData& data);
+    static MeshPtr Create(const MeshData& data);
 
     static MeshData GenerateSquareData(float width, float height);
     static MeshData GenerateTriangleData(float width, float height);

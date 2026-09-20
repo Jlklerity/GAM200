@@ -3,6 +3,7 @@
 #include "Scene/Model.hpp"
 #include "Scene/Entity.hpp"
 #include "Application/Platform.hpp"
+#include "Renderer/Mesh.hpp"
 
 class GameScene : public Model
 {

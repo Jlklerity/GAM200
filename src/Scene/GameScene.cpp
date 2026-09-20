@@ -8,20 +8,20 @@ GameScene::GameScene()
 
 void GameScene::InitModel()
 {
-    auto squareMesh     = Mesh::CreateSquare(1.0f, 1.0f);
-    auto circleMesh12     = Mesh::CreateCircle(1.0f, 12);
-    auto circleMesh25     = Mesh::CreateCircle(1.0f, 25);
-    auto triangleMesh   = Mesh::CreateTriangle(1.0f, 1.0f);
-
-    auto playerMaterial = Material::Create("player.png");
+    MeshPtr squareMesh     = Mesh::CreateSquare(1.0f, 1.0f);
+    MeshPtr circleMesh12     = Mesh::CreateCircle(1.0f, 12);
+    MeshPtr circleMesh25     = Mesh::CreateCircle(1.0f, 25);
+    MeshPtr triangleMesh   = Mesh::CreateTriangle(1.0f, 1.0f);
+   
+    MaterialPtr playerMaterial = Material::Create("player.png");
     if (squareMesh && playerMaterial)
         m_entities.emplace_back(squareMesh, playerMaterial, glm::vec3(0.0f));
         
-    auto floorMaterial = Material::Create("floor_background.jpg");
+    MaterialPtr floorMaterial = Material::Create("floor_background.jpg");
     if (circleMesh12 && floorMaterial)
         m_entities.emplace_back(circleMesh12, floorMaterial, glm::vec3(0.0f));
 
-    auto spikeMaterial = Material::Create("spike.jpg");
+    MaterialPtr spikeMaterial = Material::Create("spike.jpg");
     if (triangleMesh && spikeMaterial)
         m_entities.emplace_back(triangleMesh, spikeMaterial, glm::vec3(0.5f, -0.5f, 0.1f));
 
