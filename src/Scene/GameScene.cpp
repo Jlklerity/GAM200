@@ -1,4 +1,5 @@
 #include "Scene/GameScene.hpp"
+#include <iostream>
 
 GameScene::GameScene()
     : m_screenWidth{0}, m_screenHeight{0}
@@ -7,22 +8,33 @@ GameScene::GameScene()
 
 void GameScene::InitModel()
 {
-    auto playerMesh     = Mesh::CreateSquare(1.0f, 1.0f);
-    auto playerMaterial = Material::Create("player.png");
-    if (playerMesh && playerMaterial)
-        m_entities.emplace_back(playerMesh, playerMaterial, glm::vec3(0.0f));
-        
-    auto floorMesh     = Mesh::CreateCircle(1.0f, 12);
-    auto floorMaterial = Material::Create("floor_background.jpg");
-    if (floorMesh && floorMaterial)
-        m_entities.emplace_back(floorMesh, floorMaterial, glm::vec3(0.0f));
+    auto squareMesh     = Mesh::CreateSquare(1.0f, 1.0f);
+    auto circleMesh12     = Mesh::CreateCircle(1.0f, 12);
+    auto circleMesh25     = Mesh::CreateCircle(1.0f, 25);
+    auto triangleMesh   = Mesh::CreateTriangle(1.0f, 1.0f);
 
+    auto playerMaterial = Material::Create("player.png");
+    if (squareMesh && playerMaterial)
+        m_entities.emplace_back(squareMesh, playerMaterial, glm::vec3(0.0f));
+        
+    auto floorMaterial = Material::Create("floor_background.jpg");
+    if (circleMesh12 && floorMaterial)
+        m_entities.emplace_back(circleMesh12, floorMaterial, glm::vec3(0.0f));
+
+    auto spikeMaterial = Material::Create("spike.jpg");
+    if (triangleMesh && spikeMaterial)
+        m_entities.emplace_back(triangleMesh, spikeMaterial, glm::vec3(0.5f, -0.5f, 0.1f));
+
+    m_entities.emplace_back(triangleMesh, spikeMaterial, glm::vec3(-0.5f, -0.5f, 0.1f));
 }
 
 void GameScene::Render(const glm::vec3& cameraPos, bool useTexture)
 {
     for (auto& entity : m_entities)
+    {
         entity.Render(cameraPos, static_cast<int>(m_screenWidth), static_cast<int>(m_screenHeight), useTexture);
+        std::cout << entity.getPosition()<< '\n';
+    }
 }
 
 void GameScene::SetCamera(float d) { }

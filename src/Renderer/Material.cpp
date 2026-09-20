@@ -57,13 +57,13 @@ void Material::Bind(const glm::vec3& cameraPos, int screenW, int screenH, const 
     if (m_locProjection >= 0) glUniformMatrix4fv(m_locProjection, 1, GL_FALSE, glm::value_ptr(projection));
     if (m_locView       >= 0) glUniformMatrix4fv(m_locView,       1, GL_FALSE, glm::value_ptr(view));
     if (m_locModel      >= 0) glUniformMatrix4fv(m_locModel,      1, GL_FALSE, glm::value_ptr(model));
-    if (m_locUseTexture >= 0) glUniform1i(m_locUseTexture, m_useTexture ? 1 : 0);
-    if (m_locColor      >= 0) glUniform4fv(m_locColor, 1, glm::value_ptr(m_color));
-
+     
     bool effectiveUseTexture = m_useTexture && globalUseTexture;   
     if (m_locUseTexture >= 0) glUniform1i(m_locUseTexture, effectiveUseTexture ? 1 : 0);
     if (effectiveUseTexture && m_texture) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_texture);
     }
+    if (m_locColor      >= 0) glUniform4fv(m_locColor, 1, glm::value_ptr(m_color));
+
 }

@@ -104,11 +104,10 @@ em++ -std=c++20 -O2 ^
     src/Application/main.cpp ^
     src/Application/Application.cpp ^
     src/Scene/GameScene.cpp ^
-    src/Scene/Player.cpp ^
-    src/Scene/Floor.cpp ^
     src/Input/InputManager.cpp ^
-    src/Renderer/stb_image_impl.cpp ^
     src/Renderer/Mesh.cpp ^
+    src/Renderer/Material.cpp ^
+    src/Renderer/stb_image_impl.cpp ^
     -Isrc ^
     -I"%GLM_DIR%" ^
     -I"%STB_DIR%" ^

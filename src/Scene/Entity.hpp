@@ -2,7 +2,7 @@
 #include "Application/pch.hpp"
 #include "Renderer/Mesh.hpp"
 #include "Renderer/Material.hpp"
-
+#include <iostream>
 class Entity
 {
 public:
@@ -16,10 +16,19 @@ public:
         m_mesh->Draw();
     }
 
-    glm::vec3& Position() { return m_position; }
+    const glm::vec3& getPosition() const 
+    { 
+        return m_position; 
+    }
 
 private:
     std::shared_ptr<Mesh>     m_mesh;
     std::shared_ptr<Material> m_material;
     glm::vec3                 m_position;
 };
+
+inline std::ostream& operator<<(std::ostream& os, const glm::vec3& pos)
+{
+    os << "(" << pos.x << ", " << pos.y << ", " << pos.z << ")";
+    return os;
+}
