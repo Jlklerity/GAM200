@@ -15,7 +15,6 @@ public:
     
     
     ~Mesh();
-    Mesh() = delete;
     Mesh(const Mesh&) = delete;
     Mesh& operator=(const Mesh&) = delete;
 
@@ -26,6 +25,7 @@ public:
     void Draw();
 
 private:
+    Mesh() = default;
     static MeshPtr Create(const MeshData& data);
 
     static MeshData GenerateSquareData(float width, float height);

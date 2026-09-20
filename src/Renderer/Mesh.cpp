@@ -8,24 +8,24 @@ Mesh::~Mesh()
     if (m_EBO) glDeleteBuffers(1, &m_EBO);
 }
 
-std::shared_ptr<Mesh> Mesh::CreateSquare(float width, float height)
+MeshPtr Mesh::CreateSquare(float width, float height)
 { 
     return Create(GenerateSquareData(width, height)); 
 }
 
-std::shared_ptr<Mesh> Mesh::CreateTriangle(float width, float height)
+MeshPtr Mesh::CreateTriangle(float width, float height)
 { 
     return Create(GenerateTriangleData(width, height)); 
 }
 
-std::shared_ptr<Mesh> Mesh::CreateCircle(float radius, int segments)
+MeshPtr Mesh::CreateCircle(float radius, int segments)
 { 
     return Create(GenerateCircleData(radius, segments)); 
 }
 
-std::shared_ptr<Mesh> Mesh::Create(const MeshData& data)
+MeshPtr Mesh::Create(const MeshData& data)
 {
-    auto mesh = std::shared_ptr<Mesh>(new Mesh());
+    MeshPtr mesh = std::shared_ptr<Mesh>(new Mesh());
 
     glGenVertexArrays(1, &mesh->m_VAO);
     glBindVertexArray(mesh->m_VAO);
