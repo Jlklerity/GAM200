@@ -1,10 +1,6 @@
 #pragma once
 #include <vector>
 #include "Scene/Entity.hpp"
-#include "Application/Platform.hpp"
-#include "Renderer/Mesh.hpp"
-#include "Input/InputManager.hpp"
-#include "Renderer/ShaderHelper.hpp"
 
 class GameScene 
 {

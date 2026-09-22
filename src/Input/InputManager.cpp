@@ -1,6 +1,5 @@
 // InputManager.cpp
 #include "Input/InputManager.hpp"
-#include "Application/Application.hpp"
 #include <array>
 
 void InputManager::PollEvents(bool& running, int* screenwidth, int* screenheight, SDL_Window* window)

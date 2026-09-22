@@ -106,6 +106,8 @@ em++ -std=c++20 -O2 ^
     src/Scene/GameScene.cpp ^
     src/Input/InputManager.cpp ^
     src/Renderer/Mesh.cpp ^
+    src/Renderer/ShaderHelper.cpp ^
+    src/Renderer/AssetManager.cpp ^
     src/Renderer/Material.cpp ^
     src/Renderer/stb_image_impl.cpp ^
     -Isrc ^

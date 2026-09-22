@@ -1,10 +1,5 @@
 #pragma once
 #include "Application/pch.hpp"
-#include "Renderer/ShaderHelper.hpp"
-#include "Renderer/AssetManager.hpp"
-#include "Application/Platform.hpp"
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 class Material;
 using MaterialPtr = std::shared_ptr<Material>;

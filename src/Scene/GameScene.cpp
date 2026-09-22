@@ -1,4 +1,7 @@
 #include "Scene/GameScene.hpp"
+#include "Renderer/Mesh.hpp"
+#include "Input/InputManager.hpp"
+#include "Renderer/ShaderHelper.hpp"
 #include <iostream>
 
 GameScene::GameScene()

@@ -1,5 +1,5 @@
 #include "Application.hpp"
-
+#include "Input/InputManager.hpp"
 
 Application::Application(const char* title, int width, int height)
     : m_window{nullptr}, m_context{nullptr}, m_title{title}, m_screenWidth{width}, m_screenHeight{height},

@@ -1,9 +1,6 @@
 #pragma once
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "Application/pch.hpp"
-#include "Renderer/AssetManager.hpp"
-#include "Input/InputManager.hpp"
 #include "Scene/GameScene.hpp"
 
 
