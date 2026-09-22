@@ -6,7 +6,7 @@
 class Entity
 {
 public:
-    Entity(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material, const glm::vec3& position)
+    Entity(MeshPtr mesh, MaterialPtr material, const glm::vec3& position)
         : m_mesh{std::move(mesh)}, m_material{std::move(material)}, m_position{position} {}
 
     void Render(const glm::vec3& cameraPos, int screenW, int screenH, bool useTexture)

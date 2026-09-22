@@ -2,6 +2,7 @@
 #include "Application/pch.hpp"
 #include "Renderer/ShaderHelper.hpp"
 #include "Renderer/AssetManager.hpp"
+#include "Application/Platform.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -14,6 +15,8 @@ public:
     ~Material();
     Material(const Material&) = delete;
     Material& operator=(const Material&) = delete;
+    Material(Material&&) = delete;
+    Material& operator=(Material&&) = delete;
 
     static MaterialPtr Create(const std::string& textureFile = "",
                                             const glm::vec4& color = glm::vec4(1.0f),

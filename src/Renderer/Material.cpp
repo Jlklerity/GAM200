@@ -1,5 +1,5 @@
 #include "Renderer/Material.hpp"
-#include "Application/Platform.hpp"
+
 
 Material::~Material()
 {

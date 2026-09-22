@@ -13,18 +13,12 @@ enum class Key
     Count    
 };
 
-class InputManager {
-public:
-    InputManager() = delete;
-    InputManager(const InputManager&) = delete;
-    InputManager& operator=(const InputManager&) = delete;
-    InputManager(InputManager&&) = delete;
-    InputManager& operator=(InputManager&&) = delete;
+namespace InputManager {
+    
+    void PollEvents(bool& running, int* screenwidth, int* screenheight, SDL_Window* window);
+    void Update(float dt, bool& running, glm::vec3& cameraPos, bool& u_useTexture);
 
-    static void PollEvents(bool& running, int* screenwidth, int* screenheight, SDL_Window* window);
-    static void Update(float dt, bool& running, glm::vec3& cameraPos, bool& u_useTexture);
-
-    static bool IsKeyDown(Key key);       
-    static bool IsKeyPressed(Key key);
-    static void EndFrame();
+    bool IsKeyDown(Key key);       
+    bool IsKeyPressed(Key key);
+    void EndFrame();
 };

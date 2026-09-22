@@ -13,10 +13,11 @@ class Mesh
 {
 public:
     
-    
     ~Mesh();
     Mesh(const Mesh&) = delete;
     Mesh& operator=(const Mesh&) = delete;
+    Mesh(Mesh&&) = delete;
+    Mesh& operator=(Mesh&&) = delete;
 
     static MeshPtr CreateSquare(float width, float height);
     static MeshPtr CreateTriangle(float width, float height);

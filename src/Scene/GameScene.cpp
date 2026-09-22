@@ -1,5 +1,4 @@
 #include "Scene/GameScene.hpp"
-#include "Input/InputManager.hpp"
 #include <iostream>
 
 GameScene::GameScene()
@@ -25,7 +24,7 @@ void GameScene::InitModel()
     MaterialPtr spikeMaterial = Material::Create("spike.jpg");
     if (triangleMesh && spikeMaterial)
         m_entities.emplace_back(triangleMesh, spikeMaterial, glm::vec3(0.5f, -0.5f, 0.1f));
-
+    
     m_entities.emplace_back(triangleMesh, spikeMaterial, glm::vec3(-0.5f, -0.5f, 0.1f));
 }
 
