@@ -54,6 +54,7 @@ void Material::Bind(const glm::vec3& cameraPos, int screenW, int screenH, const 
 
     float aspect = static_cast<float>(screenW) / static_cast<float>(screenH > 0 ? screenH : 1);
     glm::mat4 projection = glm::ortho(-aspect, aspect, -1.0f, 1.0f, -1.0f, 1.0f);
+    //glm::mat projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
     glm::mat4 view  = glm::translate(glm::mat4(1.0f), -cameraPos);
     glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
 

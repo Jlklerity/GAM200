@@ -42,6 +42,9 @@ void InputManager::Update(float dt, bool& running, glm::vec3& cameraPos, bool& u
     if (keys[SDL_SCANCODE_S]) cameraPos.y -= speed * dt;
     if (keys[SDL_SCANCODE_A]) cameraPos.x -= speed * dt;
     if (keys[SDL_SCANCODE_D]) cameraPos.x += speed * dt;
+    if (keys[SDL_SCANCODE_R]) cameraPos.z -= speed * dt;
+    if (keys[SDL_SCANCODE_F]) cameraPos.z += speed * dt;
+
 
     static bool wasPressed_P = false;
     bool isPressed_P = keys[SDL_SCANCODE_P];
