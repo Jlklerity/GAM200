@@ -4,6 +4,11 @@ REM build_web.bat - Build GAM200 for WebGL2 (OpenGL ES 3.0) via Emscripten + SDL
 REM
 REM Windows counterpart of build_web.sh. Keep the two in sync.
 REM
+REM Layout: Engine\  (engine code, include root)
+REM         Game\    (game code, include root)
+REM Every .cpp under Engine\ and Game\ is compiled, so new files and folders
+REM are picked up automatically.
+REM
 REM Prerequisites:
 REM   None you need to install by hand. If em++.exe is not already on PATH,
 REM   this script will bootstrap emsdk into .\emsdk itself (see below). If
@@ -19,31 +24,34 @@ REM         local server, opens your default browser, and forwards the
 REM         page's console output back into this window, which
 REM         python -m http.server never did.)
 REM
-REM Backend: SDL2 only. The GLFW path is gone -- Platform.h and main.cpp are
-REM SDL2-only now, so there is no second block to uncomment.
+REM Backend: SDL2 only.
 REM =============================================================================
 
-SETLOCAL
+SETLOCAL EnableDelayedExpansion
+
+REM Always work from the project root, wherever the script was launched from.
+PUSHD "%~dp0"
 
 REM --- Locate or bootstrap em++ ------------------------------------------------
 REM emsdk is not a normal library dependency: it is an entire toolchain (its
-REM own clang, its own linker, its own copy of Python for emrun/glad-style
-REM helper scripts), so "just fetch a git repo" is not enough on its own -- it
-REM also has to be installed (fetches the actual prebuilt binaries for this
-REM OS/arch) and activated (writes .emscripten config + PATH additions).
+REM own clang, its own linker, its own copy of Python), so "just fetch a git
+REM repo" is not enough on its own -- it also has to be installed (fetches the
+REM actual prebuilt binaries for this OS/arch) and activated (writes .emscripten
+REM config + PATH additions).
 REM
 REM EMSDK_VERSION is pinned, not "latest", so a build from a fresh checkout
 REM today reproduces the same toolchain a build six months from now would
 REM use. Bump it deliberately, in its own commit, when you want to move --
-REM keep this in sync with the version the README tells desktop contributors
-REM to install, and with build_web.sh's EMSDK_VERSION.
+REM keep this in sync with build_web.sh's EMSDK_VERSION.
+REM
+REM NOTE: emsdk_env.bat clears any existing EMSDK_VERSION variable, so this
+REM script's copy is only reliable until emsdk_env.bat has been called.
 SET "EMSDK_VERSION=6.0.9"
 
 REM em++, NOT emcc. Emscripten links libc++/libc++abi only when LINK_AS_CXX is
 REM set, and that is driven by the driver name (tools\link.py: run_via_emxx).
 REM emcc compiles .cpp as C++ but does not link the C++ standard library, which
 REM shows up as undefined std::/__cxa_/operator new symbols at link time.
-REM (-sDEFAULT_TO_CXX=1 would also work; em++ is the documented way.)
 
 REM em++.exe, NOT bare em++. A Unix-style extensionless launcher (from a macOS
 REM or Linux emsdk copied into a Windows tree) satisfies `WHERE em++` because
@@ -60,13 +68,13 @@ IF ERRORLEVEL 1 (
         git clone https://github.com/emscripten-core/emsdk.git "%~dp0emsdk"
         IF ERRORLEVEL 1 (
             echo error: emsdk clone failed. Is git installed and on PATH?
+            POPD
             EXIT /B 1
         )
 
-        REM PUSHD/POPD, not CD: like the subshell in build_web.sh, the
-        REM directory change to run emsdk's own install/activate must not
-        REM leak into the rest of this script, or the GLM/stb clones below
-        REM would land inside emsdk\ instead of the project root.
+        REM PUSHD/POPD, not CD: the directory change to run emsdk's own
+        REM install/activate must not leak into the rest of this script, or the
+        REM GLM/stb clones below would land inside emsdk\ instead of the root.
         PUSHD "%~dp0emsdk"
 
         REM CALL is required here: emsdk.bat is itself a batch script, and
@@ -75,11 +83,13 @@ IF ERRORLEVEL 1 (
         CALL emsdk install %EMSDK_VERSION%
         IF ERRORLEVEL 1 (
             POPD
+            POPD
             echo error: emsdk install failed.
             EXIT /B 1
         )
         CALL emsdk activate %EMSDK_VERSION%
         IF ERRORLEVEL 1 (
+            POPD
             POPD
             echo error: emsdk activate failed.
             EXIT /B 1
@@ -96,7 +106,8 @@ IF ERRORLEVEL 1 (
     echo        No em++.exe found. Either emsdk is not installed for Windows,
     echo        or emsdk\upstream holds a macOS/Linux toolchain - no .exe wrappers.
     echo        Check: dir emsdk\upstream\emscripten\em++.exe
-    echo        Reinstall: cd emsdk ^&^& emsdk install %EMSDK_VERSION% ^&^& emsdk activate %EMSDK_VERSION%
+    echo        Reinstall: cd emsdk ^&^& emsdk install 6.0.9 ^&^& emsdk activate 6.0.9
+    POPD
     EXIT /B 1
 )
 
@@ -110,28 +121,49 @@ REM build's FetchContent step.
 SET "GLM_DIR=third_party\glm"
 SET "GLM_TAG=1.0.1"
 
-IF NOT EXIST "%GLM_DIR%" (
+IF NOT EXIST "%GLM_DIR%\glm\glm.hpp" (
+    IF EXIST "%GLM_DIR%" RMDIR /S /Q "%GLM_DIR%"
     echo Fetching GLM %GLM_TAG% into %GLM_DIR% ...
     git clone --branch %GLM_TAG% --depth 1 https://github.com/g-truc/glm.git "%GLM_DIR%"
     IF ERRORLEVEL 1 (
         echo error: GLM fetch failed. Is git installed and on PATH?
+        POPD
         EXIT /B 1
     )
 )
 
 SET "STB_DIR=third_party\stb"
 
-IF NOT EXIST "%STB_DIR%" (
+IF NOT EXIST "%STB_DIR%\stb_image.h" (
+    IF EXIST "%STB_DIR%" RMDIR /S /Q "%STB_DIR%"
     echo Fetching stb into %STB_DIR% ...
     git clone --depth 1 https://github.com/nothings/stb.git "%STB_DIR%"
     IF ERRORLEVEL 1 (
         echo error: stb fetch failed. Is git installed and on PATH?
+        POPD
         EXIT /B 1
     )
 )
 
+REM --- Collect sources ---------------------------------------------------------
+REM Every .cpp under Engine\ and Game\. If a file must be skipped for the web
+REM (e.g. Windows-only code), filter it out in this loop.
+SET "SOURCES="
+FOR /R Engine %%F IN (*.cpp) DO SET SOURCES=!SOURCES! "%%F"
+FOR /R Game   %%F IN (*.cpp) DO SET SOURCES=!SOURCES! "%%F"
+
+IF NOT DEFINED SOURCES (
+    echo error: no .cpp files found under Engine\ or Game\.
+    POPD
+    EXIT /B 1
+)
+
 REM --- Build ------------------------------------------------------------------
 REM Flag notes:
+REM
+REM   -IEngine -IGame
+REM       Include roots. Headers are included as "Application/Application.hpp",
+REM       "Scene/GameScene.hpp", etc., relative to Engine\ (or Game\).
 REM
 REM   -sUSE_SDL=2
 REM       SDL2 port. (--use-port=sdl2 is the newer spelling; both are current.)
@@ -149,12 +181,12 @@ REM       not apply to this target.
 REM
 REM   FULL_ES3 is deliberately NOT set. It emulates the GLES3 features WebGL2
 REM       lacks -- chiefly client-side vertex arrays -- and pulls in FULL_ES2,
-REM       costing code size and speed. main.cpp draws only from VBOs. Add it
+REM       costing code size and speed. The renderer draws only from VBOs. Add it
 REM       back if you hit an unsupported GLES3 path later.
 REM
 REM   --preload-file shaders / --preload-file images
 REM       Packs shaders\ and images\ into index.data, mounted at /shaders and
-REM       /images in MEMFS. main.cpp opens "../../shaders/...", and
+REM       /images in MEMFS. The code opens "../../shaders/...", and
 REM       Emscripten's working directory is "/", so that normalises to
 REM       "/shaders/..." because paths above the root get clamped. It works,
 REM       but it is an accident of path handling.
@@ -164,17 +196,13 @@ REM       Custom HTML shell instead of Emscripten's default minimal page.
 REM
 REM   WASM=1 is the default now, so it is no longer passed explicitly.
 
+echo Compiling:%SOURCES%
+echo.
+
 em++ -std=c++20 -O2 ^
-    src/Application/main.cpp ^
-    src/Application/Application.cpp ^
-    src/Scene/GameScene.cpp ^
-    src/Input/InputManager.cpp ^
-    src/Renderer/Mesh.cpp ^
-    src/Renderer/ShaderHelper.cpp ^
-    src/Renderer/AssetManager.cpp ^
-    src/Renderer/Material.cpp ^
-    src/Renderer/stb_image_impl.cpp ^
-    -Isrc ^
+    %SOURCES% ^
+    -IEngine ^
+    -IGame ^
     -I"%GLM_DIR%" ^
     -I"%STB_DIR%" ^
     -sUSE_SDL=2 ^
@@ -189,19 +217,23 @@ em++ -std=c++20 -O2 ^
 IF ERRORLEVEL 1 (
     echo.
     echo Build FAILED.
+    POPD
     EXIT /B 1
 )
 
 REM For a debug build, swap -O2 above for:  -O0 -g -gsource-map -sASSERTIONS=2
 
-echo ""
-echo "Build succeeded."
-echo "Launching: emrun web/index.html"
-emrun web/index.html || {
-    echo "error: emrun failed to launch."
-    echo "       Activate emsdk yourself and retry:"
-    echo "       . ./emsdk/emsdk_env.sh && emrun web/index.html"
-    exit 1
-}
+echo.
+echo Build succeeded.
+echo Launching: emrun web\index.html
+emrun web\index.html
+IF ERRORLEVEL 1 (
+    echo error: emrun failed to launch.
+    echo        Activate emsdk yourself and retry:
+    echo        emsdk\emsdk_env.bat ^&^& emrun web\index.html
+    POPD
+    EXIT /B 1
+)
 
+POPD
 ENDLOCAL

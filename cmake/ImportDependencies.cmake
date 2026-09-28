@@ -51,4 +51,19 @@ function(importDependencies)
     FetchContent_MakeAvailable(glm)
     message(STATUS "[ImportDependencies] All desktop dependencies ready.")
 
+    # stb is header-only and has no CMakeLists.txt, so MakeAvailable just
+    # downloads it. Expose it as an INTERFACE target that carries the include path.
+    message(STATUS "[ImportDependencies] Fetching stb ...")
+    FetchContent_Declare(
+        stb
+        GIT_REPOSITORY https://github.com/nothings/stb.git
+        GIT_TAG        master
+        GIT_SHALLOW    TRUE
+    )
+    FetchContent_MakeAvailable(stb)
+
+    add_library(stb INTERFACE)
+    target_include_directories(stb SYSTEM INTERFACE "${stb_SOURCE_DIR}")
+    add_library(stb::stb ALIAS stb)
+    
 endfunction()
