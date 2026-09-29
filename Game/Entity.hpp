@@ -1,7 +1,6 @@
 #pragma once
-#include "Application/pch.hpp"
-#include "Renderer/Mesh.hpp"
-#include "Renderer/Material.hpp"
+#include "Engine.hpp"
+
 #include <iostream>
 class Entity
 {

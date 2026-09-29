@@ -1,34 +1,38 @@
 #pragma once
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include "Scene/GameScene.hpp"
 
+class Scene;
 
 class Application {
 public:
 
-    Application(const char* title, int width, int height);
-    bool Initialize();
-    void MainLoop();
+    explicit Application(const char* title, int width, int height);
+    ~Application();
+    Application(const Application&) = delete;
+    Application& operator=(const Application&) = delete;
+    Application(Application&&) = delete;
+    Application& operator=(Application&&) = delete;
+
+    bool Initialize(Scene& scene);
+    void Run();
     void CleanUp();
 
-    int           m_screenWidth;
-    int           m_screenHeight;
+    int   GetScreenWidth() const;
+    int   GetScreenHeight() const;
+
 private:
     void Frame();
-    static void EmscriptenLoop(void* arg);
-    
-    void PreDraw();
-    void Draw();
+    void Update();
+    void BeginDraw() const;
+    void EndDraw();
+    bool IsRunning() const;
 
-    std::unique_ptr<GameScene> m_scene;
+    static Application* s_instance;
+    static bool         s_initialized;
 
-    glm::vec3   m_cameraPos;
-    bool        m_useTexture;
-
-    // Window / Context
-    SDL_Window*   m_window;
-    SDL_GLContext m_context;
-    const char*   m_title;
-    bool          m_running;
+    Scene* m_scene;
+    const char* m_title;
+    int           m_screenWidth;
+    int           m_screenHeight;
+    float         m_deltaTime;
+    double        m_lastFrameTime;
 };

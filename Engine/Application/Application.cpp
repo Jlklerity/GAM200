@@ -1,83 +1,139 @@
 #include "Application.hpp"
-#include "Input/InputManager.hpp"
+#include "Application/Platform.hpp"
+#include "Application/Scene.hpp"
+#include "Platform/Time.hpp"
+#include "Platform/Window.hpp"
+#include "Renderer/Renderer.hpp"
+#include <cassert>
+#include <cstdlib>
+
+Application* Application::s_instance = nullptr;
+bool         Application::s_initialized = false;
+
 
 Application::Application(const char* title, int width, int height)
-    : m_window{nullptr}, m_context{nullptr}, m_title{title}, m_screenWidth{width}, m_screenHeight{height},
-      m_running{false}, m_cameraPos{0.0f, 0.0f, 0.0f}, m_useTexture{true} {}
-
-bool Application::Initialize() 
+    : m_scene{ nullptr }, m_title{ title }, m_screenWidth{ width }, m_screenHeight{ height },
+    m_deltaTime{ 0.0f }, m_lastFrameTime{ 0.0 }
 {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) return false;
+    if (s_instance != nullptr)
+    {
+        LOGE("Application: only one Application can exist");
+        std::fflush(stdout);   
+        std::abort();
+    }
+    s_instance = this;
+}
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,  24);
+Application::~Application()
+{
+    s_instance = nullptr;
+}
 
-    m_window = SDL_CreateWindow(m_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                m_screenWidth, m_screenHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    if (!m_window) return false;
+bool Application::Initialize(Scene& scene)
+{
+    if (s_initialized)
+    {
+        LOGE("Application::Initialize: the engine was already initialized");
+        return false;
+    }
+    s_initialized = true;
+    
+    m_scene = &scene;
 
-    m_context = SDL_GL_CreateContext(m_window);
-    if (!m_context) return false;
+    if (!Window::Create(m_title, m_screenWidth, m_screenHeight)) return false;
+    Window::GetFramebufferSize(&m_screenWidth, &m_screenHeight);
 
-#ifdef PLATFORM_NEEDS_GL_LOADER
-    if (gladLoadGLES2((GLADloadfunc)SDL_GL_GetProcAddress) == 0) return false;
-#endif
-    glEnable(GL_DEPTH_TEST);
-    SDL_GL_SetSwapInterval(1);
-    SDL_GL_GetDrawableSize(m_window, &m_screenWidth, &m_screenHeight);
+    Renderer::Init();
 
-    m_scene = std::make_unique<GameScene>();
     m_scene->InitModel();
     m_scene->Resize(m_screenWidth, m_screenHeight);
 
+    m_lastFrameTime = Time::GetTime();
     return true;
-}      
-
-void Application::PreDraw() 
-{
-    glViewport(0, 0, m_screenWidth, m_screenHeight);
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Application::Draw() 
+void Application::Run()
 {
-    m_scene->Render(m_cameraPos, m_useTexture);
-}
-
-void Application::Frame() 
-{
-    static Uint64 previous = SDL_GetPerformanceCounter();
-    const Uint64 now = SDL_GetPerformanceCounter();
-    const float dt = static_cast<float>(static_cast<double>(now - previous) / static_cast<double>(SDL_GetPerformanceFrequency()));
-    previous = now;
-
-    InputManager::PollEvents(m_running, &m_screenWidth, &m_screenHeight, m_window);
-    InputManager::Update(dt, m_running, m_cameraPos, m_useTexture);
-    PreDraw();
-    Draw();
-    SDL_GL_SwapWindow(m_window);
-}
-
-void Application::EmscriptenLoop(void* arg) 
-{
-    static_cast<Application*>(arg)->Frame();
-}
-
-void Application::MainLoop() 
-{
-    m_running = true;
 #ifdef PLATFORM_EMSCRIPTEN
-    emscripten_set_main_loop_arg(EmscriptenLoop, this, 0, 1);
+    emscripten_set_main_loop_arg([](void* arg)
+        {
+            Application* app = static_cast<Application*>(arg);
+            if (!app->IsRunning())
+            {
+                app->CleanUp();
+                emscripten_cancel_main_loop();
+                return;
+            }
+            app->Frame();
+        }, this, 0, 1);   
 #else
-    while (m_running) { Frame(); }
+    while (IsRunning())
+    {
+        Frame();
+    }
 #endif
 }
 
-void Application::CleanUp() 
+void Application::CleanUp()
 {
-    SDL_Quit();
+    if (m_scene == nullptr) return;
+    
+    m_scene->CleanUp();                 
+    m_scene = nullptr;
+    Window::Destroy();
+}
+
+void Application::Frame()
+{
+    Update();
+    m_scene->Update(m_deltaTime);
+
+    BeginDraw();
+    m_scene->Draw();
+    EndDraw();
+}
+
+void Application::Update()
+{
+    const double now = Time::GetTime();
+    m_deltaTime = static_cast<float>(now - m_lastFrameTime);
+    m_lastFrameTime = now;
+
+    Window::PollEvents();
+
+    int width = 0, height = 0;
+    Window::GetFramebufferSize(&width, &height);
+    if (width != m_screenWidth || height != m_screenHeight)
+    {
+        m_screenWidth = width;
+        m_screenHeight = height;
+        m_scene->Resize(m_screenWidth, m_screenHeight);
+    }
+}
+
+void Application::BeginDraw() const
+{
+    Renderer::SetViewport(0, 0, m_screenWidth, m_screenHeight);
+    Renderer::SetClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    Renderer::Clear();
+}
+
+void Application::EndDraw()
+{
+    Window::SwapBuffers();
+}
+
+bool Application::IsRunning() const
+{
+    return m_scene->IsRunning() && !Window::ShouldClose();
+}
+
+int Application::GetScreenWidth() const
+{
+    return m_screenWidth;
+}
+
+int Application::GetScreenHeight() const
+{
+    return m_screenHeight;
 }

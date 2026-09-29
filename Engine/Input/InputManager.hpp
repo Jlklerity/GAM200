@@ -1,5 +1,4 @@
 #pragma once
-#include "Application/pch.hpp"
 
 enum class Key
 {
@@ -10,15 +9,12 @@ enum class Key
     Escape, Enter, Backspace,
     LeftControl, RightControl,
     LeftShift, RightShift,
-    Count    
+    Count
 };
 
-namespace InputManager {
-    
-    void PollEvents(bool& running, int* screenwidth, int* screenheight, SDL_Window* window);
-    void Update(float dt, bool& running, glm::vec3& cameraPos, bool& u_useTexture);
-
-    bool IsKeyDown(Key key);       
+namespace InputManager
+{
+    bool IsKeyDown(Key key);
     bool IsKeyPressed(Key key);
     void EndFrame();
-};
+}

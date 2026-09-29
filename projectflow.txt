@@ -1,18 +1,55 @@
-main(argc, argv):
-    Init()                      // SDL_Init, attributes, window, context, GL loader
-    VertexSpecification()
-    CreateGraphicsPipeline()
+main(argc, argv):                               // Game/main.cpp
+    Application app{ "GAM200", 640, 480 }       // aborts if a second Application exists
+    GameScene scene                             // derives from Scene
 
+    if (app.Initialize(scene))
+        app.Run()
+    app.CleanUp()                               // desktop only; web never returns from Run()
+
+Application::Initialize(scene):
+    guard: fail if already initialized
+    m_scene = &scene
+    Window::Create(title, w, h)                 // SDL_Init(VIDEO), GL ES 3.0 attributes, depth 24,
+                                                // double buffer, SDL_CreateWindow (resizable, high-DPI),
+                                                // SDL_GL_CreateContext, gladLoadGLES2 (desktop only), vsync on
+    Window::GetFramebufferSize(&w, &h)
+    Renderer::Init()                            // glEnable(GL_DEPTH_TEST)
+    scene.InitModel()                           // Mesh::Create*, Material::Create (shaders/, images/)
+    scene.Resize(w, h)
+    m_lastFrameTime = Time::GetTime()
+
+Application::Run():
     #ifdef PLATFORM_EMSCRIPTEN
-        emscripten_set_main_loop(Frame, 0, 1);   // never returns
+        emscripten_set_main_loop_arg(lambda, this, 0, 1)    // never returns
+            lambda:
+                if (!IsRunning())
+                    CleanUp()                   // (web fix)
+                    emscripten_cancel_main_loop()
+                    return
+                Frame()
     #else
-        while (g_running) Frame();
-        CleanUp();
+        while (IsRunning()) Frame()
     #endif
 
+IsRunning():
+    scene.IsRunning() && !Window::ShouldClose()
+
 Frame():
-    PollEvents()    // SDL_PollEvent: SDL_QUIT, SDL_WINDOWEVENT_SIZE_CHANGED -> update viewport
-    Input(dt)       // SDL_GetKeyboardState
-    PreDraw()
-    Draw()
-    SDL_GL_SwapWindow(g_window)
+    Update()
+        dt = Time::GetTime() - m_lastFrameTime  // SDL performance counter
+        Window::PollEvents()                    // SDL_QUIT -> ShouldClose
+        if framebuffer size changed -> scene.Resize(w, h)
+    scene.Update(dt)                            // GameScene -> InputManager::Update(...)
+    BeginDraw()
+        Renderer::SetViewport(0, 0, w, h)
+        Renderer::SetClearColor(0.1, 0.1, 0.1, 1)
+        Renderer::Clear()                       // color | depth
+    scene.Draw()                                // per entity: Material::Bind(...) then Mesh::Draw()
+    EndDraw()
+        Window::SwapBuffers()                   // SDL_GL_SwapWindow
+
+Application::CleanUp():
+    if (!m_scene) return                        // (web fix) safe to call twice
+    scene.CleanUp()                             // releases Mesh/Material -> glDelete* while context exists
+    m_scene = nullptr
+    Window::Destroy()                           // SDL_GL_DeleteContext, SDL_DestroyWindow, SDL_Quit

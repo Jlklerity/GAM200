@@ -1,16 +1,16 @@
 #include "Engine.hpp"
+#include "GameScene.hpp"
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char* /*argv*/[])
 {
-    (void)argc;
-    (void)argv;
-    
-    Application app{"GAM200", 640, 480};
-    if (app.Initialize())
+    Application app{ "GAM200", 640, 480 };
+    GameScene scene;
+
+    if (app.Initialize(scene))
     {
-        app.MainLoop();
+        app.Run();
     }
-    
     app.CleanUp();
     return 0;
+    
 }
